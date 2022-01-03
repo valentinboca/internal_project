@@ -31,7 +31,6 @@ export function ThemeProvider({ children }: { children: any | null }) {
   const [state, dispatch] = useReducer(themeReducer, initialState.color);
 
   const changeColor = (color: string) => {
-    console.log('culoarea este' + color)
     dispatch({ type: "CHANGE_COLOR", payload: color });
   };
 

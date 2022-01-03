@@ -10,7 +10,6 @@ export default function RecipeList({ recipes }: { recipes: any[] }) {
   }
 
   const deleteRecipe = (id: string) => {
-    console.log("deleted" + id);
     projectRecipeBook.collection("recipes").doc(id).delete();
   };
 
