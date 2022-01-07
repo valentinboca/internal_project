@@ -1,5 +1,6 @@
-import { useReducer, useEffect, useState } from "react";
+import { useReducer, useEffect, useState, Reducer } from "react";
 import { projectRecipeBook } from "../firebase/config";
+import { Query } from "@firebase/firestore-types";
 
 const initialState = {
   document: null,
@@ -8,7 +9,27 @@ const initialState = {
   success: null,
 };
 
-const firestoreReducer = (state: any, action: any) => {
+type Recipe = {
+  uid: string;
+  title: string;
+  ingredients: string[];
+  method: string;
+  cookingTime: string;
+};
+
+type State = {
+  isPending: boolean;
+  error: string;
+  success: boolean;
+  document: Recipe;
+};
+
+type Action = {
+  type: string;
+  payload: Recipe;
+};
+
+const firestoreReducer: Reducer<any, any> = (state, action) => {
   switch (action.type) {
     case "IS_PENDING":
       return {
@@ -44,14 +65,14 @@ export const useFireStore = (collection: string) => {
   const ref = projectRecipeBook.collection(collection);
 
   // only dispatch if not cancelled
-  const dispatchIfNotCancelled = (action: object) => {
+  const dispatchIfNotCancelled = (action: any) => {
     if (!isCancelled) {
       dispatch(action);
     }
   };
 
   // add document
-  const addDocument = async (doc: object) => {
+  const addDocument = async (doc: Recipe) => {
     dispatch({ type: "IS_PENDING" });
     try {
       const addedDocument = await ref.add(doc);
@@ -71,5 +92,5 @@ export const useFireStore = (collection: string) => {
     return () => setIsCancelled(true);
   }, []);
 
-  return { addDocument, deleteDocument, response}
+  return { addDocument, deleteDocument, response };
 };

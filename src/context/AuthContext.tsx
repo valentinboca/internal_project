@@ -1,5 +1,6 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, Reducer, useEffect, useReducer } from "react";
 import { projectAuth } from "../firebase/config";
+import { Query } from "@firebase/firestore-types";
 
 type ContextProps = {
   user: {
@@ -12,13 +13,29 @@ type ContextProps = {
   dispatch: Function;
 };
 
+type User = {
+  email: string;
+  displayName: string;
+  uid: string;
+};
+
+type Action = { type: string; payload: User | any };
+
 const initialState = {
   user: { email: "", password: "", displayName: "", uid: "" },
   authIsReady: false,
   dispatch: Function,
 };
 
-export const authReducer = (state: any, action: any) => {
+type State = {
+  user: User | any;
+  authIsReady: boolean;
+};
+
+export const authReducer: Reducer<State, Action> = (
+  state: State,
+  action: Action
+) => {
   switch (action.type) {
     case "LOGIN":
       return { ...state, user: action.payload };
@@ -33,11 +50,10 @@ export const authReducer = (state: any, action: any) => {
 
 export const AuthContext = createContext<ContextProps>(initialState);
 
-export const AuthContextProvider = ({ children }: { children: any | null }) => {
-  const [state, dispatch] = useReducer(authReducer, {
-    user: null,
-    authIsReady: false,
-  });
+export const AuthContextProvider = ({ children }: { children: any }) => {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  console.log("auth context state ", state);
 
   useEffect(() => {
     const unsub = projectAuth.onAuthStateChanged((user) => {
@@ -46,7 +62,6 @@ export const AuthContextProvider = ({ children }: { children: any | null }) => {
     });
   }, []);
 
-  console.log("AuthContext state ", state);
   return (
     <AuthContext.Provider value={{ ...state, dispatch }}>
       {children}

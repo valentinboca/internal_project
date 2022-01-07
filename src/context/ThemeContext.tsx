@@ -1,22 +1,38 @@
-import { createContext, useReducer } from "react";
+import { createContext, Reducer, useReducer } from "react";
 
 type ContextProps = {
-  changeColor: Function;
-  changeMode: Function;
+  changeColor: (color: string) => void;
+  changeMode: (mode: string) => void;
   color: string;
-  mode: string
+  mode: string;
 };
 
 const initialState = {
-  changeColor: Function,
-  changeMode: Function,
-  color: 'green',
-  mode: 'dark'
+  changeColor: (color: string) => {
+    dispatch({ type: '', payload: color });
+  },
+  changeMode: (mode: string) => {
+    dispatch({ type: '', payload: mode });
+  },
+  color: "grey",
+  mode: "dark",
 };
+
+type State = {
+  changeColor: (color: string) => void;
+  changeMode: (mode: string) => void;
+  color: string;
+  mode: string;
+};
+
+type Action = {
+  type: string,
+  payload: string
+}
 
 export const ThemeContext = createContext<ContextProps>(initialState);
 
-const themeReducer = (state: any, action: any) => {
+const themeReducer: Reducer<any, Action> = (state: State, action: Action) => {
   switch (action.type) {
     case "CHANGE_COLOR":
       return { ...state, color: action.payload };
@@ -28,6 +44,7 @@ const themeReducer = (state: any, action: any) => {
 };
 
 export function ThemeProvider({ children }: { children: any | null }) {
+  console.log(children)
   const [state, dispatch] = useReducer(themeReducer, initialState.color);
 
   const changeColor = (color: string) => {
@@ -38,9 +55,12 @@ export function ThemeProvider({ children }: { children: any | null }) {
     dispatch({ type: "CHANGE_MODE", payload: mode });
   };
 
-   return (
+  return (
     <ThemeContext.Provider value={{ ...state, changeColor, changeMode }}>
       {children},
     </ThemeContext.Provider>
   );
+}
+function dispatch(arg0: {}) {
+  throw new Error("Function not implemented.");
 }

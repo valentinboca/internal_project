@@ -1,29 +1,61 @@
 import "./Searchbar.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { projectRecipeBook } from "../firebase/config";
+import { useCollection } from "../hooks/useCollection";
+import { useAuthContext } from "../hooks/useAuthContext";
+import { Query } from "@firebase/firestore-types";
+import RecipeList from "./RecipeList";
+import React from "react";
 
 export default function Searchbar() {
+  const { user } = useAuthContext();
   const [term, setTerm] = useState<string>("");
   const navigate = useNavigate();
+  const [documents, setDocuments] = useState<[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // to be added 
+  // to be added
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
   };
 
-  const handleChange = (e: any) => {
-    console.log(e.target.value);
+  const handleChange = (
+    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+  ) => {
     setTerm(e.target.value);
+    const unsubscribe = projectRecipeBook
+      .collection("recipes")
+      .where("title", "==", e.target.value)
+      .where("uid", "==", user.uid)
+      .onSnapshot(
+        (snapshot) => {
+          let results: any = [];
+          snapshot.docs.forEach((doc) => {
+            results.push({ ...doc.data(), id: doc.id });
+          });
+
+          // update state
+          setDocuments(results);
+          setError(null);
+        },
+        (error) => {
+          console.log(error);
+          setError("could not fetch the data");
+        }
+      );
+
+    // unsubscribe on unmount
+    return () => unsubscribe();
   };
 
   return (
     <div className="searchbar">
       <form onSubmit={handleSubmit}>
         <label htmlFor="search">Search:</label>
-        <input type="text" id="search" onChange={handleChange} required />
+        <input type="search" id="search" onChange={handleChange} required />
       </form>
+      {documents && <RecipeList recipes={documents} />}
     </div>
   );
 }

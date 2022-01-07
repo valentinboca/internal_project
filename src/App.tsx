@@ -11,6 +11,7 @@ import Search from "./pages/search/Search";
 import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
 import { useAuthContext } from "./hooks/useAuthContext";
+import Searchbar from "./components/SearchBar";
 
 function App() {
   const { mode }: any = useTheme();
