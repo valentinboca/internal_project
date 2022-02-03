@@ -14,8 +14,14 @@ import { useAuthContext } from "./hooks/useAuthContext";
 import Searchbar from "./components/SearchBar";
 
 function App() {
-  const { mode }: any = useTheme();
-  const { authIsReady, user }: any = useAuthContext();
+  const { mode }: { mode: string } = useTheme();
+  const {
+    authIsReady,
+    user,
+  }: {
+    authIsReady: Boolean;
+    user: { email: string; displayName: string; uid: string };
+  } = useAuthContext();
 
   return (
     <div className={`App ${mode}`}>

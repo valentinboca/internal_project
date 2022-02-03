@@ -44,7 +44,7 @@ const themeReducer: Reducer<any, Action> = (state: State, action: Action) => {
 };
 
 export function ThemeProvider({ children }: { children: any | null }) {
-  console.log(children)
+  console.log('children',typeof children)
   const [state, dispatch] = useReducer(themeReducer, initialState.color);
 
   const changeColor = (color: string) => {

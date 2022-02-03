@@ -17,6 +17,15 @@ type Recipe = {
   cookingTime: string;
 };
 
+type Ingredient = {
+  ingredient: string;
+};
+
+type Ingredient2 = {
+  label: string | null;
+  value: string | null
+}
+
 type State = {
   isPending: boolean;
   error: string;
@@ -38,7 +47,14 @@ const firestoreReducer: Reducer<any, any> = (state, action) => {
         success: false,
         error: null,
       };
-    case "ADDED_DOCUMENT":
+    case "ADDED_RECIPE":
+      return {
+        isPending: false,
+        document: action.payload,
+        success: true,
+        error: null,
+      };
+    case "ADDED_INGREDIENT":
       return {
         isPending: false,
         document: action.payload,
@@ -72,13 +88,39 @@ export const useFireStore = (collection: string) => {
   };
 
   // add document
-  const addDocument = async (doc: Recipe) => {
+  const addRecipe = async (doc: Recipe) => {
     dispatch({ type: "IS_PENDING" });
     try {
-      const addedDocument = await ref.add(doc);
+      const addedRecipe = await ref.add(doc);
       dispatchIfNotCancelled({
-        type: "ADDED_DOCUMENT",
-        payload: addedDocument,
+        type: "ADDED_RECIPE",
+        payload: addedRecipe,
+      });
+    } catch (error) {
+      dispatchIfNotCancelled({ type: "ERROR", payload: error });
+    }
+  };
+
+  const addIngredient = async (doc: Ingredient) => {
+    dispatch({ type: "IS_PENDING" });
+    try {
+      const addedIngredient = await ref.add(doc);
+      dispatchIfNotCancelled({
+        type: "ADDED_INGREDIENT",
+        payload: addedIngredient,
+      });
+    } catch (error) {
+      dispatchIfNotCancelled({ type: "ERROR", payload: error });
+    }
+  };
+
+  const addIngredient1 = async (doc: Ingredient2) => {
+    dispatch({ type: "IS_PENDING" });
+    try {
+      const addedIngredient = await ref.add(doc);
+      dispatchIfNotCancelled({
+        type: "ADDED_INGREDIENT",
+        payload: addedIngredient,
       });
     } catch (error) {
       dispatchIfNotCancelled({ type: "ERROR", payload: error });
@@ -92,5 +134,5 @@ export const useFireStore = (collection: string) => {
     return () => setIsCancelled(true);
   }, []);
 
-  return { addDocument, deleteDocument, response };
+  return { addRecipe, addIngredient, addIngredient1, deleteDocument, response };
 };

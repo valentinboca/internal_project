@@ -53,8 +53,6 @@ export const AuthContext = createContext<ContextProps>(initialState);
 export const AuthContextProvider = ({ children }: { children: any }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  console.log("auth context state ", state);
-
   useEffect(() => {
     const unsub = projectAuth.onAuthStateChanged((user) => {
       dispatch({ type: "AUTH_IS_READY", payload: user });

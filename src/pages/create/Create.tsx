@@ -5,6 +5,11 @@ import { useNavigate } from "react-router";
 import { projectRecipeBook } from "../../firebase/config";
 import { useFireStore } from "../../hooks/useFirestore";
 import { useAuthContext } from "../../hooks/useAuthContext";
+import React, { Component } from "react";
+import Select from "react-select";
+import Creatable, { useCreatable } from "react-select/creatable";
+import { ActionMeta, OnChangeValue } from "react-select";
+import ValueType from "react-select";
 
 export default function Create({}) {
   const [title, setTitle] = useState<string>("");
@@ -13,14 +18,18 @@ export default function Create({}) {
   const [newIngredient, setNewIngredient] = useState<string>("");
   const [ingredients, setIngredients] = useState<string[]>([]);
   const ingredientInput = useRef<HTMLHeadingElement>(null);
-  const { addDocument, response } = useFireStore("recipes");
+  const { addRecipe, response } = useFireStore("recipes");
+  const { addIngredient } = useFireStore("ingredients");
+  const { addIngredient1 } = useFireStore("ingredients");
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [ingredientsFromDB, setIngredientsFromDB] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(title, method, cookingTime, ingredients);
-    addDocument({
+    addRecipe({
       uid: user.uid,
       title,
       ingredients,
@@ -28,28 +37,35 @@ export default function Create({}) {
       cookingTime: cookingTime + " minutes",
     });
     navigate("/");
+  };
 
-    // try {
-    //   await projectRecipeBook.collection("recipes").add(doc);
-    //   navigate("/");
-    // } catch (error) {
-    //   console.log(error);
+  const handleAdd = async (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    // const ing = newIngredient.trim();
+
+    // if (ing && !ingredients.includes(ing)) {
+    //   setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
+    //   addIngredient({ ingredient: ing });
+    // }
+
+    // setNewIngredient("");
+    // if (null !== ingredientInput.current) {
+    //   ingredientInput.current.focus();
     // }
   };
 
-  const handleAdd = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    const ing = newIngredient.trim();
+  interface Option {
+    label: string;
+    value: string;
+  }
 
-    if (ing && !ingredients.includes(ing)) {
-      setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
-    }
-
-    setNewIngredient("");
-    if (null !== ingredientInput.current) {
-      ingredientInput.current.focus();
-    }
+  const handleCreateIngredient = (v: any): v is Option => {
+    if ((v as Option).value !== undefined) return v.value;
+    return false;
   };
+
+  const handleChange1 = (inputValue: any) => console.log(inputValue);
+  // addIngredient1({ value: newIngredient.toLowerCase(), label: newIngredient.charAt(0).toUpperCase() + newIngredient.slice(1)});
 
   useEffect(() => {
     if (response.success) {
@@ -59,8 +75,56 @@ export default function Create({}) {
     }
   }, [response.success]);
 
+  type LoadAllIngredients = () => void;
+
+  const loadAllIngredients: LoadAllIngredients = () => {
+    const unsubscribe = projectRecipeBook.collection("ingredients").onSnapshot(
+      (snapshot) => {
+        let results: any = [];
+        snapshot.docs.forEach((doc) => {
+          results.push(doc.data());
+        });
+
+        // update state
+        setIngredientsFromDB(results);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+
+    // unsubscribe on unmount
+    return () => unsubscribe();
+  };
+
+  useEffect(() => {
+    loadAllIngredients();
+  }, []);
+
   return (
     <div className="create">
+      <Creatable
+        isClearable
+        onChange={async (v) => {
+          if (handleCreateIngredient(v)) {
+            // const snapshot = await projectRecipeBook
+            //   .collection("ingredients")
+            //   .get();
+            // let docRef = projectRecipeBook
+            //   .collection("ingredients")
+            //   .doc(v.value);
+            // docRef.get().then((doc) => {
+            //   console.log("ddad", doc.data());
+            //   if (doc.exists) {
+            //     addIngredient1({ value: v.value, label: v.value });
+            //   }
+            // });
+            addIngredient1({ value: v.value, label: v.value });
+          }
+        }}
+        // onInputChange={handleChange}
+        options={ingredientsFromDB}
+      />
       <h2 className="page-title">Add a New Recipe</h2>
       <form onSubmit={handleSubmit}>
         <label>

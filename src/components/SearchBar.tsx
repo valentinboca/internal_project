@@ -23,10 +23,11 @@ export default function Searchbar() {
   const handleChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ) => {
+    console.log(e.target.value);
     setTerm(e.target.value);
     const unsubscribe = projectRecipeBook
       .collection("recipes")
-      .where("title", "==", e.target.value)
+      .where("title".toLowerCase(), "==", e.target.value.toLowerCase())
       .where("uid", "==", user.uid)
       .onSnapshot(
         (snapshot) => {
@@ -51,10 +52,10 @@ export default function Searchbar() {
 
   return (
     <div className="searchbar">
-      <form onSubmit={handleSubmit}>
+      <div>
         <label htmlFor="search">Search:</label>
         <input type="search" id="search" onChange={handleChange} required />
-      </form>
+      </div>
       {documents && <RecipeList recipes={documents} />}
     </div>
   );

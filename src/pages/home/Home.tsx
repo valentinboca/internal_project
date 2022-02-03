@@ -48,6 +48,7 @@ export function Home() {
   const handleChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ) => {
+    console.log(e.target.value.toLowerCase())
     const term = e.target.value;
     setTerm(term);
     setTerm(e.target.value);
