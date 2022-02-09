@@ -1,0 +1,12 @@
+.search-bar-dropdown {
+    width: auto;
+}
+
+#results {
+    position: absolute;
+    width: inherit;
+}
+
+#search-bar {
+    width: inherit;
+}

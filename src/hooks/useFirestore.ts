@@ -27,18 +27,20 @@ type Ingredient2 = {
 }
 
 type State = {
-  isPending: boolean;
-  error: string;
+  isPending: boolean | null;
+  error: string | null;
   success: boolean;
-  document: Recipe;
+  document: Recipe | null;
 };
 
 type Action = {
   type: string;
-  payload: Recipe;
+  payload: Recipe | any;
 };
 
 const firestoreReducer: Reducer<any, any> = (state, action) => {
+  console.log('actionul este ', action.type)
+  console.log('payloadul este ', action.payload)
   switch (action.type) {
     case "IS_PENDING":
       return {
@@ -55,6 +57,7 @@ const firestoreReducer: Reducer<any, any> = (state, action) => {
         error: null,
       };
     case "ADDED_INGREDIENT":
+      console.log('asd  ', action.payload)
       return {
         isPending: false,
         document: action.payload,
