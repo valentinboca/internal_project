@@ -5,7 +5,16 @@
 #results {
     position: absolute;
     width: inherit;
-}
+    overflow-y: scroll;
+    height: 20em;
+    background-color: #fafafa;
+    /* border-bottom: 1px #eeeeee solid; */
+  }
+  
+  #results > button {
+    background-color: #fafafa;
+    color: #1f9751
+  }
 
 #search-bar {
     width: inherit;
