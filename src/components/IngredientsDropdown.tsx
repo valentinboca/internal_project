@@ -15,28 +15,26 @@ export default function IngredientsDropdown({
   const [unit, setUnit] = useState<string>("unit");
   const [ingredient, setIngredient] = useState<string>();
   const [newIngredient, setNewIngredient] = useState<string>("");
+  const [newIngredientWithQuantity, setNewIngredientWithQuantity] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");
   const [addedIngredients, setAddedIngredients] = useState<string[]>([]);
 
   const handleAdd = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    console.log("ingredient nou  ", addedIngredients);
-    const ing = newIngredient.trim();
-    console.log('ing', ing)
-
-    if (ing && !addedIngredients.includes(ing)) {
+    const duplicateIngredient = addedIngredients.find(a =>a.includes(newIngredient)); 
+    const ing = newIngredient.split(" ")[0]
+    
+    if (ing && !duplicateIngredient) {
       setAddedIngredients((prevIngredients) => [
         ...prevIngredients,
-        newIngredient
+        newIngredient + ' ' + quantity
       ]);
+      setNewIngredientWithQuantity(newIngredient + ' ' + quantity)
     }
-
-    console.log(addedIngredients)
 
     inputRef.current!.value = ''
     setQuantity('')
     setUnit('unit')
-    console.log(quantity.length)
     if (null !== inputRef.current) {
       inputRef.current.focus();
     }
@@ -78,7 +76,7 @@ export default function IngredientsDropdown({
               onClick={(e) => {
                 inputRef.current!.value = ingredient.label;
                 setUnit(ingredient.unit);
-                setNewIngredient(ingredient.label)
+                setNewIngredient(ingredient.label + ' (' + ingredient.unit + ')')
               }}
             >
               {ingredient.label}
@@ -91,8 +89,8 @@ export default function IngredientsDropdown({
       </button>
       <p>
         Current ingredients:{" "}
-        {addedIngredients.map((i) => (
-          <em key={i}>{i}; </em>
+        {addedIngredients.map((ingredient) => (
+          <em key={ingredient}>{ingredient}; </em>
         ))}
       </p>
     </div>
