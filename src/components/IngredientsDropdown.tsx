@@ -13,7 +13,6 @@ export default function IngredientsDropdown({
   const ulRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [unit, setUnit] = useState<string>("unit");
-  const [ingredient, setIngredient] = useState<string>();
   const [newIngredient, setNewIngredient] = useState<string>("");
   const [newIngredientWithQuantity, setNewIngredientWithQuantity] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");

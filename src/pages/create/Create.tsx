@@ -20,12 +20,14 @@ export default function Create({}) {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const ingredientInput = useRef<HTMLHeadingElement>(null);
   const { addRecipe, response } = useFireStore("recipes");
-  const { addIngredient } = useFireStore("ingredients");
-  const { addIngredient1 } = useFireStore("ingredients");
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const [selectedOption, setSelectedOption] = useState(null);
   const [ingredientsFromDB, setIngredientsFromDB] = useState<string[]>([]);
+  const ulRef = useRef<HTMLUListElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [unit, setUnit] = useState<string>("unit");
+   const [quantity, setQuantity] = useState<string>("");
+  const [options, setOptions] = useState<any[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,33 +42,10 @@ export default function Create({}) {
     navigate("/");
   };
 
-  const handleAdd = async (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    const ing = newIngredient.trim();
-
-    if (ing && !ingredients.includes(ing)) {
-      setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
-      addIngredient({ ingredient: ing });
-    }
-
-    setNewIngredient("");
-    if (null !== ingredientInput.current) {
-      ingredientInput.current.focus();
-    }
-  };
-
-  interface Option {
-    label: string;
-    value: string;
-  }
-
-  const handleCreateIngredient = (v: any): v is Option => {
-    if ((v as Option).value !== undefined) return v.value;
-    return false;
-  };
-
-  const handleChange1 = (inputValue: any) => console.log(inputValue);
-  // addIngredient1({ value: newIngredient.toLowerCase(), label: newIngredient.charAt(0).toUpperCase() + newIngredient.slice(1)});
+  // const handleCreateIngredient = (v: any): v is Option => {
+  //   if ((v as Option).value !== undefined) return v.value;
+  //   return false;
+  // };
 
   useEffect(() => {
     if (response.success) {
@@ -98,7 +77,6 @@ export default function Create({}) {
     return () => unsubscribe();
   };
 
-  const [options, setOptions] = useState<[]>([])
 
   useEffect(() => {
     loadAllIngredients();
@@ -107,11 +85,7 @@ export default function Create({}) {
   const handleChange = (
     e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ) => {
-    // console.log(e.target.value.toLowerCase());
     const term = e.target.value;
-    // setOptions(term);
-    // setOptions(e.target.value);
-
     const unsubscribe = projectRecipeBook
       .collection("ingredients")
       .orderBy("label")
@@ -137,10 +111,162 @@ export default function Create({}) {
     return () => unsubscribe();
   };
 
+  const handleAdd = async (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    const duplicateIngredient = ingredients.find((a) =>
+      a.includes(newIngredient)
+    );
+    const ing = newIngredient.split(" ")[0];
+
+    if (ing && !duplicateIngredient) {
+      setIngredients((prevIngredients) => [
+        ...prevIngredients,
+        newIngredient + " " + quantity,
+      ]);
+    }
+
+    inputRef.current!.value = "";
+    setQuantity("");
+    setUnit("unit");
+    if (null !== inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  useEffect(() => {
+    inputRef.current?.addEventListener("click", (e) => {
+      e?.stopPropagation();
+      ulRef.current!.style.display = "flex";
+      ulRef.current!.style.flexDirection = "column";
+      // onInputChange(e);
+      const x = (e.target as HTMLTextAreaElement).value;
+      const unsubscribe = projectRecipeBook
+        .collection("ingredients")
+        .orderBy("label")
+        .startAt(x)
+        .endAt(x + "\uf8ff")
+        .onSnapshot(
+          (snapshot) => {
+            let results: any = [];
+            snapshot.docs.forEach((doc) => {
+              results.push({ ...doc.data(), id: doc.id });
+            });
+
+            // update state
+            setOptions(results);
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+
+      // unsubscribe on unmount
+      return () => unsubscribe();
+    });
+    document.addEventListener("click", (e) => {
+      ulRef.current!.style.display = "none";
+    });
+  }, []);
 
   return (
     <div className="create">
-      <Creatable
+      
+      {/* <IngredientsDropdown ingredients={options} onInputChange={handleChange} /> */}
+      <h2 className="page-title">Add a New Recipe</h2>
+      <form onSubmit={handleSubmit}>
+        <label>
+          <span>Recipe title:</span>
+          <input
+            type="text"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
+            required
+          />
+        </label>
+        
+        <label className="search-bar-dropdown">
+        <input
+          type="search"
+          onChange={handleChange}
+          placeholder="Search ingredient..."
+          ref={inputRef}
+        />
+        <input
+          type="text"
+          placeholder={unit}
+          onChange={(e) => setQuantity(e.target.value)}
+          value={quantity}
+        />
+        <ul id="results" ref={ulRef}>
+          {options.map((option) => {
+            return (
+              <button
+                type="button"
+                key={option.id}
+                onClick={(e) => {
+                  inputRef.current!.value = option.label;
+                  setUnit(option.unit);
+                  setNewIngredient(option.label + " (" + option.unit + ")");
+                }}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </ul>
+        <button onClick={handleAdd} className="button">
+          add
+        </button>
+        <p>
+          Current ingredients:{" "}
+          {ingredients.map((ingredient) => (
+            <em key={ingredient}>{ingredient}; </em>
+          ))}
+        </p>
+        </label>
+
+        {/* <label>
+          <span>Recipe ingredients:</span>
+          <div className="ingredients">
+            <input
+              type="text"
+              onChange={(e) => setNewIngredient(e.target.value)}
+              value={newIngredient}
+            />
+            <button onClick={handleAdd} className="button">
+              add
+            </button>
+          </div>
+        </label>
+
+        <p>
+          Current ingredients:{" "}
+          {ingredients.map((i) => (
+            <em key={i}>{i}, </em>
+          ))}
+        </p> */}
+
+        <label>
+          <span>Recipe method:</span>
+          <textarea
+            onChange={(e) => setMethod(e.target.value)}
+            value={method}
+            required
+          />
+        </label>
+
+        <label>
+          <span>Cooking time (minutes):</span>
+          <input
+            type="number"
+            onChange={(e) => setCookingTime(e.target.value)}
+            value={cookingTime}
+            required
+          />
+        </label>
+
+        <button className="button">submit</button>
+        {/* <Creatable
         isClearable
         onChange={async (v) => {
           if (handleCreateIngredient(v)) {
@@ -237,61 +363,7 @@ export default function Create({}) {
         }}
         // onInputChange={handleChange}
         options={ingredientsFromDB}
-      />
-      <IngredientsDropdown ingredients={options} onInputChange={handleChange} />
-      <h2 className="page-title">Add a New Recipe</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          <span>Recipe title:</span>
-          <input
-            type="text"
-            onChange={(e) => setTitle(e.target.value)}
-            value={title}
-            required
-          />
-        </label>
-
-        <label>
-          <span>Recipe ingredients:</span>
-          <div className="ingredients">
-            <input
-              type="text"
-              onChange={(e) => setNewIngredient(e.target.value)}
-              value={newIngredient}
-            />
-            <button onClick={handleAdd} className="button">
-              add
-            </button>
-          </div>
-        </label>
-
-        <p>
-          Current ingredients:{" "}
-          {ingredients.map((i) => (
-            <em key={i}>{i}, </em>
-          ))}
-        </p>
-
-        <label>
-          <span>Recipe method:</span>
-          <textarea
-            onChange={(e) => setMethod(e.target.value)}
-            value={method}
-            required
-          />
-        </label>
-
-        <label>
-          <span>Cooking time (minutes):</span>
-          <input
-            type="number"
-            onChange={(e) => setCookingTime(e.target.value)}
-            value={cookingTime}
-            required
-          />
-        </label>
-
-        <button className="button">submit</button>
+      /> */}
       </form>
     </div>
   );
