@@ -26,7 +26,7 @@ export default function Create({}) {
   const ulRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [unit, setUnit] = useState<string>("unit");
-   const [quantity, setQuantity] = useState<string>("");
+  const [quantity, setQuantity] = useState<string>("");
   const [options, setOptions] = useState<any[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -76,7 +76,6 @@ export default function Create({}) {
     // unsubscribe on unmount
     return () => unsubscribe();
   };
-
 
   useEffect(() => {
     loadAllIngredients();
@@ -170,7 +169,6 @@ export default function Create({}) {
 
   return (
     <div className="create">
-      
       {/* <IngredientsDropdown ingredients={options} onInputChange={handleChange} /> */}
       <h2 className="page-title">Add a New Recipe</h2>
       <form onSubmit={handleSubmit}>
@@ -183,46 +181,47 @@ export default function Create({}) {
             required
           />
         </label>
-        
+
         <label className="search-bar-dropdown">
-        <input
-          type="search"
-          onChange={handleChange}
-          placeholder="Search ingredient..."
-          ref={inputRef}
-        />
-        <input
-          type="text"
-          placeholder={unit}
-          onChange={(e) => setQuantity(e.target.value)}
-          value={quantity}
-        />
-        <ul id="results" ref={ulRef}>
-          {options.map((option) => {
-            return (
-              <button
-                type="button"
-                key={option.id}
-                onClick={(e) => {
-                  inputRef.current!.value = option.label;
-                  setUnit(option.unit);
-                  setNewIngredient(option.label + " (" + option.unit + ")");
-                }}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </ul>
-        <button onClick={handleAdd} className="button">
-          add
-        </button>
-        <p>
-          Current ingredients:{" "}
-          {ingredients.map((ingredient) => (
-            <em key={ingredient}>{ingredient}; </em>
-          ))}
-        </p>
+          <span>Recipe ingredients:</span>
+          <input
+            type="search"
+            onChange={handleChange}
+            placeholder="Search ingredient..."
+            ref={inputRef}
+          />
+          <ul id="results" ref={ulRef}>
+            {options.map((option) => {
+              return (
+                <button
+                  type="button"
+                  key={option.id}
+                  onClick={(e) => {
+                    inputRef.current!.value = option.label;
+                    setUnit(option.unit);
+                    setNewIngredient(option.label + " (" + option.unit + ")");
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </ul>
+          <input
+            type="text"
+            placeholder={unit}
+            onChange={(e) => setQuantity(e.target.value)}
+            value={quantity}
+          />
+          <button onClick={handleAdd} className="button">
+            add
+          </button>
+          <p>
+            Current ingredients:{" "}
+            {ingredients.map((ingredient) => (
+              <em key={ingredient}>{ingredient}; </em>
+            ))}
+          </p>
         </label>
 
         {/* <label>
