@@ -34,10 +34,11 @@
 #results {
   position: absolute;
   top: 90px;
-  width: inherit;
+  width: 450px;
   overflow-y: scroll;
   /* height: 20em; */
   background-color: #fafafa;
+  z-index: 99 !important;
 }
 
 #results > button {

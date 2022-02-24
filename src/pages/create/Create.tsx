@@ -99,7 +99,7 @@ export default function Create({}) {
 
           // update state
           setOptions(results);
-          console.log(results);
+          console.log(results.length);
         },
         (error) => {
           console.log(error);
@@ -207,21 +207,25 @@ export default function Create({}) {
               );
             })}
           </ul>
-          <input
+          {options.length === 1 && <input
             type="text"
             placeholder={unit}
             onChange={(e) => setQuantity(e.target.value)}
             value={quantity}
-          />
-          <button onClick={handleAdd} className="button">
+          />}
+          {options.length === 0 && <p>Can't find it? Let's add it!</p>}
+          {options.length != 0 && <button onClick={handleAdd} className="button">
             add
-          </button>
-          <p>
+          </button>}
+          {options.length === 0 && <button onClick={handleAdd} className="button">
+            add new
+          </button>}
+          {options.length >= 1 && <p>
             Current ingredients:{" "}
             {ingredients.map((ingredient) => (
               <em key={ingredient}>{ingredient}; </em>
             ))}
-          </p>
+          </p>}
         </label>
 
         {/* <label>
